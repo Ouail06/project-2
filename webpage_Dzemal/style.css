@@ -1,3 +1,50 @@
 body{
-    background-color: aquamarine;
+    background-color: gray;
 }
+header{
+    position: sticky;
+    top: 0px;
+  }
+  body{
+    background-color: grey;
+  }
+  
+  
+  nav {
+      display: flex;
+      flex-direction: row;
+  }
+   nav ul{
+    display: flex;
+    flex-direction: row;
+    float: left;
+    width: 100%;
+   }
+      
+      nav ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          background-color: #333;
+      }
+
+     nav li a{
+          display: inline;
+          color: white;
+          float: right;
+          text-align: center;
+          padding: 20px 85px;
+          text-decoration: none;
+        }
+       nav li a:hover {
+          background-color: forestgreen;
+        }
+  
+        
+        a{
+          color: white;
+        }
+        h1{
+            padding-left: 400px;
+        }
