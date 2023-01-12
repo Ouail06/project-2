@@ -1,250 +1,210 @@
-(function($, window, undefined){
 
-  Hangman = {
-    init: function(words){
-      this.words = words,
-      this.hm = $(".hangman"),
-      this.msg = $(".message"),
-      this.msgTitle = $(".title"),
-      this.msgText = $(".text"),
-      this.restart = $(".restart"),
-      this.wrd = this.randomWord(),
-      this.correct = 0,
-      this.guess = $(".guess"),
-      this.wrong = $(".wrong"),
-      this.wrongGuesses = [],
-      this.rightGuesses = [],
-      this.guessForm = $(".guessForm"),
-      this.guessLetterInput = $(".guessLetter"),
-      this.goodSound = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/74196/goodbell.mp3"),
-      this.badSound = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/74196/bad.mp3"),
-      this.winSound = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/74196/win.mp3"),
-      this.loseSound = new Audio("https://s3-us-west-2.amazonaws.com/s.cdpn.io/74196/lose.mp3"),
-      this.setup();
-    },
+const letterContainer = document.getElementById("letter-container");
+const optionsContainer = document.getElementById("options-container");
+const userInputSection = document.getElementById("user-input-section");
+const newGameContainer = document.getElementById("new-game-container");
+const newGameButton = document.getElementById("new-game-button");
+const canvas = document.getElementById("canvas");
+const resultText = document.getElementById("result-text");
 
+let options = {
+  fruits: [
+    "Apple",
+    "Blueberry",
+    "Mandarin",
+    "Pineapple",
+    "Pomegranate",
+    "Watermelon",
+  ],
+  animals: ["Hedgehog", "Rhinoceros", "Squirrel", "Panther", "Walrus", "Zebra"],
+  countries: [
+    "India",
+    "Hungary",
+    "Kyrgyzstan",
+    "Switzerland",
+    "Zimbabwe",
+    "Dominica",
+  ],
+};
 
-    setup: function(){
-      this.binding();
-      this.sounds();
-      this.showGuess(this.wrongGuesses);
-      this.showWrong();
+const displayOptions = () => {
+  optionsContainer.innerHTML += `<h3>Please Select An Option</h3>`;
+  let buttonCon = document.createElement("div");
+  for (let value in options) {
+    buttonCon.innerHTML += `<button class="options" onclick="generateWord('${value}')">${value}</button>`;
+  }
+  optionsContainer.appendChild(buttonCon);
+};
 
-    },
-
-    
-    sounds: function(){  
-      this.badSound.volume = .4;
-      this.goodSound.volume = .4;
-      this.winSound.volume = .8;
-      this.loseSound.volume = .4;
-      
-    },
-    
-    
-    binding: function(){
-      this.guessForm.on("submit", $.proxy(this.theGuess, this));
-      this.restart.on("click", $.proxy(this.theRestart, this));
-    },
-
-
-    playSound: function(sound){
-      this.stopSound(sound);
-      this[sound].play();
-    },
-
-
-    stopSound: function(sound){
-      this[sound].pause();
-      this[sound].currentTime = 0;
-
-    },
-
-
-    theRestart: function(e){
-      e.preventDefault();
-      this.stopSound("winSound");
-      this.stopSound("loseSound");
-      this.reset();
-    },
-
-
-    theGuess: function(e){
-      e.preventDefault();
-      var guess = this.guessLetterInput.val();
-      if(guess.match(/[a-zA-Z]/) && guess.length == 1){
-        if($.inArray(guess, this.wrongGuesses) > -1 || $.inArray(guess, this.rightGuesses) > -1){
-          this.playSound("badSound");
-          this.guessLetterInput.val("").focus();
-        }
-        else if(guess) {
-          var foundLetters = this.checkGuess(guess);
-          if(foundLetters.length > 0){
-            this.setLetters(foundLetters);
-            this.playSound("goodSound");
-            this.guessLetterInput.val("").focus();
-          } else {
-            this.wrongGuesses.push(guess);
-            if(this.wrongGuesses.length == 10){
-              this.lose();
-            } else {
-              this.showWrong(this.wrongGuesses);
-              this.playSound("badSound");
-            }
-            this.guessLetterInput.val("").focus();
-          }
-        }
-      } else {
-        this.guessLetterInput.val("").focus();
-      }
-    },
-
-    randomWord: function(){
-      return this._wordData(this.words[ Math.floor(Math.random() * this.words.length)] );
-    },
-
-
-    showGuess: function(){
-      var frag = "<ul class='word'>";
-      $.each(this.wrd.letters, function(key, val){
-        frag += "<li data-pos='" +  key  + "' class='letter'>*</li>";
-      });
-      frag += "</ul>";
-      this.guess.html(frag);
-    },
-
-
-    showWrong: function(wrongGuesses){
-      if(wrongGuesses){
-        var frag = "<ul class='wrongLetters'>";
-        frag += "<p>Wrong Letters: </p>";
-        $.each(wrongGuesses, function(key, val){
-          frag += "<li>" + val + "</li>";
-        });
-        frag += "</ul>";
-      }
-      else {
-        frag = "";
-      }
-
-      this.wrong.html(frag);
-    },
-
-
-    checkGuess: function(guessedLetter){
-      var _ = this;
-      var found = [];
-      $.each(this.wrd.letters, function(key, val){
-        if(guessedLetter == val.letter.toLowerCase()){
-          found.push(val);
-          _.rightGuesses.push(val.letter);
-        }
-      });
-      return found;
-
-    },
-
-
-    setLetters: function(letters){
-      var _ = this;
-      _.correct = _.correct += letters.length;
-      $.each(letters, function(key, val){
-        var letter = $("li[data-pos=" +val.pos+ "]");
-        letter.html(val.letter);
-        letter.addClass("correct");
-
-        if(_.correct  == _.wrd.letters.length){
-          _.win();
-        }
-      });
-    },
-
-
-    _wordData: function(word){
-
-      return {
-        letters: this._letters(word),
-        word: word.toLowerCase(),
-        totalLetters: word.length
-      };
-    },
-
-
-    hideMsg: function(){
-      this.msg.hide();
-      this.msgTitle.hide();
-      this.restart.hide();
-      this.msgText.hide();
-    },
-
-
-    showMsg: function(){
-      var _ = this;
-      _.msg.show("blind", function(){
-        _.msgTitle.show("bounce", "slow", function(){
-          _.msgText.show("slide", function(){
-            _.restart.show("fade");
-          });
-
-        });
-
-      });
-    },
-
-
-    reset: function(){
-      this.hideMsg();
-      this.init(this.words);
-      this.hm.find(".guessLetter").focus();
-
-    },
-
-
-    _letters: function(word){
-      var letters = [];
-      for(var i=0; i<word.length; i++){
-        letters.push({
-          letter: word[i],
-          pos: i
-        });
-      }
-      return letters;
-    },
-
-
-    rating: function(){
-      var right = this.rightGuesses.length,
-          wrong = this.wrongGuesses.length || 0,
-          rating = {
-            rating: Math.floor(( right / ( wrong + right )) * 100),
-            guesses: (right + wrong)
-            
-          };
-      return rating;
-    },
-
-    win: function(){
-      var rating = this.rating();
-      this.msgTitle.html("Awesome, You Won!");
-      // this is messy
-      this.msgText.html("You solved the word in <span class='highlight'>" + rating.guesses + "</span> Guesses!<br>Score: <span class='highlight'>" + rating.rating + "%</span>");
-      this.showMsg();
-      this.playSound("winSound");
-
-    },
-
-
-    lose: function(){
-      this.msgTitle.html("You Lost.. The word was <span class='highlight'>"+ this.wrd.word +"</span>");
-      this.msgText.html("Don't worry, you'll get the next one!");
-      this.showMsg();
-      this.playSound("loseSound");
+const generateWord = (optionValue) => {
+  let optionsButtons = document.querySelectorAll(".options");
+  //If optionValur matches the button innerText then highlight the button
+  optionsButtons.forEach((button) => {
+    if (button.innerText.toLowerCase() === optionValue) {
+      button.classList.add("active");
     }
-  
+    button.disabled = true;
+   //initially hide letters, clear previous word
+  letterContainer.classList.remove("hide");
+  userInputSection.innerText = "";
+
+  let optionArray = options[optionValue];
+  //choose random word
+  chosenWord = optionArray[Math.floor(Math.random() * optionArray.length)];
+  chosenWord = chosenWord.toUpperCase();
+
+  //replace every letter with span containing dash
+  let displayItem = chosenWord.replace(/./g, '<span class="dashes">_</span>');
+
+  //Display each element as span
+  userInputSection.innerHTML = displayItem;
+  });
+
+  //Initial Function (Called when page loads/user presses new game)
+const initializer = () => {
+  winCount = 0;
+  count = 0;
+
+  //Initially erase all content and hide letteres and new game button
+  userInputSection.innerHTML = "";
+  optionsContainer.innerHTML = "";
+  letterContainer.classList.add("hide");
+  newGameContainer.classList.add("hide");
+  letterContainer.innerHTML = "";
+
+  //For creating letter buttons
+  for (let i = 65; i < 91; i++) {
+    let button = document.createElement("button");
+    button.classList.add("letters");
+    //Number to ASCII[A-Z]
+    button.innerText = String.fromCharCode(i);
+    //character button click
+    button.addEventListener("click", () => {
+      let charArray = chosenWord.split("");
+      let dashes = document.getElementsByClassName("dashes");
+      //if array contains clciked value replace the matched dash with letter else dram on canvas
+      if (charArray.includes(button.innerText)) {
+        charArray.forEach((char, index) => {
+          //if character in array is same as clicked button
+          if (char === button.innerText) {
+            //replace dash with letter
+            dashes[index].innerText = char;
+            //increment counter
+            winCount += 1;
+            //if winCount equals word lenfth
+            if (winCount == charArray.length) {
+              resultText.innerHTML = `<h2 class='win-msg'>You Win!!</h2><p>The word was <span>${chosenWord}</span></p>`;
+              //block all buttons
+              blocker();
+            }
+          }
+        });
+      } else {
+        //lose count
+        count += 1;
+        //for drawing man
+        drawMan(count);
+        //Count==6 because head,body,left arm, right arm,left leg,right leg
+        if (count == 6) {
+          resultText.innerHTML = `<h2 class='lose-msg'>You Lose!!</h2><p>The word was <span>${chosenWord}</span></p>`;
+          blocker();
+        }
+      }
+      //disable clicked button
+      button.disabled = true;
+    });
+    letterContainer.append(button);
+  }
+
+  displayOptions();
+  //Call to canvasCreator (for clearing previous canvas and creating initial canvas)
+  let { initialDrawing } = canvasCreator();
+  //initialDrawing would draw the frame
+  initialDrawing();
+};}
+
+//Canvas
+const canvasCreator = () => {
+  let context = canvas.getContext("2d");
+  context.beginPath();
+  context.strokeStyle = "#000";
+  context.lineWidth = 2;
+
+  //For drawing lines
+  const drawLine = (fromX, fromY, toX, toY) => {
+    context.moveTo(fromX, fromY);
+    context.lineTo(toX, toY);
+    context.stroke();
   };
 
-  var wordList = ["chrome", "firefox", "codepen", "javascript", "jquery", "twitter", "github", "wordpress", "opera", "sass", "layout", "standards", "semantic", "designer", "developer", "module", "component", "website", "creative", "banner", "browser", "screen", "mobile", "footer", "header", "typography", "responsive", "programmer", "css", "border", "compass", "grunt", "pixel", "document", "object", "ruby", "modernizr", "bootstrap", "python", "php", "pattern", "ajax", "node", "element", "android", "application", "adobe", "apple", "google", "microsoft", "bookmark", "internet", "icon", "svg", "background", "property", "syntax", "flash", "html", "font", "blog", "network", "server", "content", "database", "socket", "function", "variable", "link", "apache", "query", "proxy", "backbone", "angular", "email", "underscore", "cloud"];
+  const head = () => {
+    context.beginPath();
+    context.arc(70, 30, 10, 0, Math.PI * 2, true);
+    context.stroke();
+  };
 
-  Hangman.init(wordList);
-  
-})(jQuery, window);
+  const body = () => {
+    drawLine(70, 40, 70, 80);
+  };
+
+  const leftArm = () => {
+    drawLine(70, 50, 50, 70);
+  };
+
+  const rightArm = () => {
+    drawLine(70, 50, 90, 70);
+  };
+
+  const leftLeg = () => {
+    drawLine(70, 80, 50, 110);
+  };
+
+  const rightLeg = () => {
+    drawLine(70, 80, 90, 110);
+  };
+
+  //initial frame
+  const initialDrawing = () => {
+    //clear canvas
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    //bottom line
+    drawLine(10, 130, 130, 130);
+    //left line
+    drawLine(10, 10, 10, 131);
+    //top line
+    drawLine(10, 10, 70, 10);
+    //small top line
+    drawLine(70, 10, 70, 20);
+  };
+
+  return { initialDrawing, head, body, leftArm, rightArm, leftLeg, rightLeg };
+};
+
+const drawMan = (count) => {
+  let { head, body, leftArm, rightArm, leftLeg, rightLeg } = canvasCreator();
+  switch (count) {
+    case 1:
+      head();
+      break;
+    case 2:
+      body();
+      break;
+    case 3:
+      leftArm();
+      break;
+    case 4:
+      rightArm();
+      break;
+    case 5:
+      leftLeg();
+      break;
+    case 6:
+      rightLeg();
+      break;
+    default:
+      break;
+  }
+};
+
+newGameButton.addEventListener("click", initializer);
+window.onload = initializer;
