@@ -26,29 +26,18 @@
       
   </nav>
 
-  </header>
+  </header> 
 <body>
-  <div class="wrapper">
-    <h1>Galgje</h1>
-    <h3>Kies een letter van het alfabet hieronder.</h3>
-    <div class="letter-div"></div>
-    <p>Klik hier voor een hint</p>
-    <div class="hint-div hidden">
-      <p>Hint:-</p>
-      <p class="hint-txt"></p>
-    </div>
-    <div class="word-div"></div>
-    <h3>Huidig aantal levens: <span class="lives">5</span></h3>
-    <div class="row hint-div">
-      <button class="hint-btn">Hint</button>
-      <button class="reset-btn">Reset</button>
-    </div>
-  </div>
-  <div class="notif hidden">
-    <h2>Game Over !!</h2>
-    <h3 class="notif-content">You won</h3>
-    <h4>Correct Word: <span class="notif-span"></span></h4>
-    <button class="notif-btn">Speel nog een keer</button>
-  </div>
+  <h1>Hangman<br>
+    Your favorite classroom pastime returns!</h1>
+  <p id="raadveld"></p>
+  <form name="raadform">
+  <input name="raadteken" type="text" size="5" maxlength="1">
+  <input name="raad knop type="button" value="Raad" onClick="testtekens()">
+  
+  <p id="gerade letters">Verkeerde Letters:</p>
+  <img src="http://www.writteninpencil.de/Projekte/Hangman/hangman0.png" id="hangman"><br />
+  <input name="refresh" type="button" value="New Game" onClick="location.reload()">
+  </form>
 </body>
 </html>
