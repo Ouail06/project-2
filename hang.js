@@ -1,4 +1,4 @@
-var waarde  = [
+var lsgwoerter = [
   ["T", "R", "E", "E", "H", "O", "U", "S", "E"],
     ["J","A","V","A","S","C","R","I","P","T"],
     ["W","E","B","D","E","S","I","G","N"],
@@ -6,74 +6,74 @@ var waarde  = [
     ["C","H","O","C","O","L","A","T","E"],
     ["G","E","R","M","A","N","Y"]
   ]
-  var random = Math.floor((Math.random()*(waarde.length-1))); 
+  var random = Math.floor((Math.random()*(lsgwoerter.length-1))); 
   
-  var waarde = waarde[random]; // De word die je moet raden zal bestaan uit de array hierboven
-  var woord = new Array(waardet.length);
-  var fout = 0;
+  var lsgwort = lsgwoerter[random]; // the word to guess will be chosen from the array above
+  var ratewort = new Array(lsgwort.length);
+  var fehler = 0;
   
-  // elke letter in het woord wordt aangetoont door een onderstrepingsteken in het gisveld
-  for (var i = 0; i < raadwaarde.length; i++){
-    raadwaarde[i] = "_ ";
+  // every letter in the word is symbolized by an underscore in the guessfield
+  for (var i = 0; i < ratewort.length; i++){
+    ratewort[i] = "_ ";
   }
   
-  // print het raadveld
-  function PrintRaadwoord(){
-    for (var i = 0; i < raadwaarde.length; i++){
-    var ratefeld = document.getElementById("raadveld");
-    var buchstabe = document.createTextNode(raadveld[i]);
-    raadveld.ja(brief);
+  // prints the guessfield
+  function printRatewort(){
+    for (var i = 0; i < ratewort.length; i++){
+    var raadveld = document.getElementById("raadveld");
+    var buchstabe = document.createTextNode(ratewort[i]);
+    raadveld.appendChild(buchstabe);
     }
   }
   
-  //controleert of de door de gebruiker verstrekte brief overeenkomt met een of meer van de letters in het woord
-  var merken = function(){
-    var f = document.raadform; 
-    var b = f.elements["raadteken"]; 
-    var teken = b.value; // the letter provided by the user
-    teken = teken.toUpperCase();
-    for (var i = 0; i < waarde.length; i++){
-      if(waarde[i] === teken){
-        raadwaarde[i] = merken + " ";
+  //checks if the the letter provided by the user matches one or more of the letters in the word
+  var testtekens = function(){
+    var f = document.rateformular; 
+    var b = f.elements["raadknop"]; 
+    var knop = b.value; // the letter provided by the user
+    knop = knop.toUpperCase();
+    for (var i = 0; i < lsgwort.length; i++){
+      if(lsgwort[i] === knop){
+        ratewort[i] = knop + " ";
         var treffer = true;
       }
     b.value = "";
     }
     
-    //verwijdert het Raadveld en vervangt het door het nieuwe
+    //deletes the guessfield and replaces it with the new one
     var raadveld = document.getElementById("raadveld");
     raadveld.innerHTML=""; 
-    PrintRaadwoord();
+    printRatewort();
     
-    //als er een verkeerde letter in word getypt komt het op de niet geraden lijst 
+    // if a guessed letter is not in the word, the letter will be put on the "wrong letters"-list and hangman grows
     if(!treffer){
-      var Verkeerdgeraden = document.getElementById("verkeerd geraden");
-      var Geraden = document.createTextNode(" " + teken);
-      geradenletters.ja(verkeerdgeraden); 
-      fout++;
+      var gerateneBuchstaben = document.getElementById("gerateneBuchstaben");
+      var buchstabe = document.createTextNode(" " + knop);
+      gerateneBuchstaben.appendChild(buchstabe); 
+      fehler++;
       var hangman = document.getElementById("hangman");
-      hangman.src = "http://www.writteninpencil.de/Projekte/Hangman/hangman" + fout + ".png";
+      hangman.src = "http://www.writteninpencil.de/Projekte/Hangman/hangman" + fehler + ".png";
     }
     
-    //checked of alle letters gevonden zijn
-    var klaar = true;
-    for (var i = 0; i < raadwaarde.length; i++){
-      if(raadwaarde[i] === "_ "){
-        klaar = false;
+    //checks if all letters have been found
+    var fertig = true;
+    for (var i = 0; i < ratewort.length; i++){
+      if(ratewort[i] === "_ "){
+        fertig = false;
       }
     }
-    if(klaar){
-      window.alert("Goed gedaan!");
+    if(fertig){
+      window.alert("You win!");
     }
     
-    //na 6 fouten word het gereset
-    if(Fout === 6){
-      window.alert("Jammer net niet gehaald.");
+    //once you got six wrong letters, you lose
+    if(fehler === 6){
+      window.alert("Uh...I guess you're dead now.");
     }
   }
   
   function init(){
-    PrintRaadwoord();
+    printRatewort();
   }
   
   window.onload = init;
