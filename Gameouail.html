@@ -28,16 +28,14 @@
 
   </header> 
 <body>
-  <h1>Hangman<br>
-    Your favorite classroom pastime returns!</h1>
-  <p id="raadveld"></p>
-  <form name="raadform">
-  <input name="raadteken" type="text" size="5" maxlength="1">
-  <input name="raadknop type="button value="Raad" onClick="testtekens()">
-  
-  <p id="geradeletters">Verkeerde Letters:</p>
-  <img src="http://www.writteninpencil.de/Projekte/Hangman/hangman0.png" id="hangman"><br />
-  <input name="refresh" type="button" value="New Game" onClick="location.reload()">
-  </form>
+  <div class="container">
+    <h1>Canvas Tetris</h1>
+    <div id="canvasTetris"></div>
+    <div class="description">
+      &#8592; &#8593; &#8594; &#8595; to move, P to pause
+      <br/> Speed increases every 1000 earned score points
+      <br/> Click to play
+    </div>
+  </div>
 </body>
 </html>
