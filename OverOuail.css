@@ -1,6 +1,15 @@
+#basketbal{
+  display: flex;
+  
+}
+#ouail{
+  display: flex;
+  justify-content: center;
+  color: green;
+}
 img{
-  height: 400px;
-  width: 400px;
+  padding-top: 100px;
+  padding-right: 1220px;
 }
 :root {
   --color-primary: white;
@@ -15,7 +24,11 @@ img{
 }
 body {
   font-family: sans-serif;
- 
+  background-color: #e1e9f0;
+  background-image: url(https://th.bing.com/th/id/R.eaefd9c31147a874207a23a79f3234b3?rik=69xJXt4yu1slTw&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fjYyIPxx.jpg&ehk=MSb5GasCjy4o3R7pheAtYgNeNYEzWfYJuMpnfDj8oSI%3d&risl=&pid=ImgRaw&r=0);
+  background-repeat: no-repeat;
+   background-attachment: fixed;
+  background-size: 100% 100%;
 }
 .logo {
   color: var(--color-white);

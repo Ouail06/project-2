@@ -1,11 +1,19 @@
 body{
-   background-image: url(https://th.bing.com/th/id/R.367db89006baec615dcddf3dc68aef83?rik=6fjtIbFr66PJjw&pid=ImgRaw&r=0);
+   background-image: url(https://th.bing.com/th/id/R.eaefd9c31147a874207a23a79f3234b3?rik=69xJXt4yu1slTw&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fjYyIPxx.jpg&ehk=MSb5GasCjy4o3R7pheAtYgNeNYEzWfYJuMpnfDj8oSI%3d&risl=&pid=ImgRaw&r=0);
    background-repeat: no-repeat;
    background-attachment: fixed;
   background-size: 100% 100%;
 }
-
+#welkom{
+  display: flex;
+  justify-content: center;
   
+}
+  h3{
+    display: flex;
+   justify-content: center;
+   font-size: small;
+  }
 img{
     width: 2000px;
     height: 900px;
