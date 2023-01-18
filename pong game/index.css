@@ -1,0 +1,19 @@
+#gameContainer{
+    text-align: center; /* het scorebord en de knop worden in het midden geplaatst */ 
+}
+#gameBoard{
+    border: 3px solid;
+}
+#scoreText{
+    font-family:"consolas", monospace;  /* het lettertype van het scorebord verandert */ 
+    font-size: 100px; /* het grootte van het scorebord verandert */
+}
+#resetBtn{
+    font-family: "Permanent Marker", cursive; /* lettertype knop verandert */
+    font-size: 22px; /* grootte knop verandert */
+    width: 100px; /* breedte knop vernadert */
+    height: 50px; /* hoogte knop verandert */
+    border: 4px solid; /* grootte van de rand verandert */
+    border-radius: 15px; /* randen worden ronder */
+    cursor: pointer; 
+}
