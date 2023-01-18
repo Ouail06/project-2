@@ -1,0 +1,61 @@
+body{
+   background-image: url(https://wallpaperset.com/w/full/2/c/b/489299.jpg);
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+  background-size: 100% 100%;
+}
+
+  header{
+    position: sticky;
+    top: 0px;
+  }
+  
+  
+  nav {
+      display: flex;
+      flex-direction: row;
+  }
+   nav ul{
+    display: flex;
+    flex-direction: row;
+    float: left;
+    width: 100%;
+   }
+      
+      nav ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          background-color: #333;
+      }
+  
+     nav li a{
+          display: inline;
+          color: white;
+          float: right;
+          text-align: center;
+          padding: 20px 85px;
+          text-decoration: none;
+        }
+       nav li a:hover {
+          background-color: forestgreen;
+        }
+  
+        
+        a{
+          color: white;
+        }
+img{
+    width: 2000px;
+    height: 900px;
+}
+
+.shoaib{
+    width: 700px;
+    height: 600px;
+}*/
+img{
+    height: 400px;
+    width: 400px;
+}
