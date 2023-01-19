@@ -614,16 +614,16 @@ var canvasTetris = function(parentNode) {
 
     if (!game.paused) {
       switch (e.keyCode) {
-        case 37: // Left
+        case 37: // links
           tetromino.move(-1, 0);
           break;
-        case 38: // Up
+        case 38: // boven
           tetromino.rotate();
           break;
-        case 39: // Right
+        case 39: // Rechts
           tetromino.move(1, 0);
           break;
-        case 40: // Down
+        case 40: // beneden
           tetromino.move(0, 1);
           break;
         case 80: // P

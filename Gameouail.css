@@ -119,4 +119,8 @@ body {
         box-shadow: 3px 3px 5px #a0a8aF;
         outline: none;
       }
+      #tetris{
+        display: flex;
+        justify-content: center;
+      }
       
