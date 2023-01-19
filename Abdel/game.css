@@ -1,27 +1,19 @@
-#gameContainer{
-    text-align: center; /* het scorebord en de knop worden in het midden geplaatst */ 
+
+div p{
+    font-size: 20px;
+    margin-right: 200px;
 }
-#gameBoard{
-    border: 3px solid;
+div button{
+margin-left: 175px;
 }
-#scoreText{
-    font-family:"consolas", monospace;  /* het lettertype van het scorebord verandert */ 
-    font-size: 100px; /* het grootte van het scorebord verandert */
-}
-#resetBtn{
-    font-family: "Permanent Marker", cursive; /* lettertype knop verandert */
-    font-size: 22px; /* grootte knop verandert */
-    width: 100px; /* breedte knop vernadert */
-    height: 50px; /* hoogte knop verandert */
-    border: 4px solid; /* grootte van de rand verandert */
-    border-radius: 15px; /* randen worden ronder */
-    cursor: pointer; 
+div h1{
+    margin-left: 100px;
 }
 img{
     height: 400px;
     width: 400px;
-}
-:root {
+  }
+  :root {
     --color-primary: white;
     --color-white: green;
     --color-black: black;
@@ -34,7 +26,10 @@ img{
   }
   body {
     font-family: sans-serif;
-   
+    background-image: url(https://th.bing.com/th/id/R.eaefd9c31147a874207a23a79f3234b3?rik=69xJXt4yu1slTw&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fjYyIPxx.jpg&ehk=MSb5GasCjy4o3R7pheAtYgNeNYEzWfYJuMpnfDj8oSI%3d&risl=&pid=ImgRaw&r=0);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+   background-size: 100% 100%;
   }
   .logo {
     color: var(--color-white);
@@ -111,9 +106,4 @@ img{
     background-image: url(./bg.jpg);
     background-position: center;
   }
-  body{
-    background-image: url(https://th.bing.com/th/id/R.eaefd9c31147a874207a23a79f3234b3?rik=69xJXt4yu1slTw&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fjYyIPxx.jpg&ehk=MSb5GasCjy4o3R7pheAtYgNeNYEzWfYJuMpnfDj8oSI%3d&risl=&pid=ImgRaw&r=0);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-   background-size: 100% 100%;
- }
+  
