@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong game</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="menu-bar">
+        <h1 class="logo">TCR<span>Project</span></h1>
+        <ul>
+          <li><a href="/home.html#">Home</a></li>
+          <li><a href="/webpage_Dzemal/app.html">Over Dzemal</a></li>
+          <li><a href="/OverOuail.html#">Over Ouail</a></li>
+          <li><a href="abdel.html">Over Abdel</a></li>
+          <li><a href="#">Games <i class="fas fa-caret-down"></i></a>
+              <div class="dropdown-menu">
+                  <ul>
+                    <li><a href="/Abdel/game.html">Raad het getal</a></li>
+                    <li><a href="/Gameouail.html#">Tetris</a></li>
+                    
+                  </ul>
+                </div>
+          </li>
+          <li><a href="/webpage_Dzemal/index.html">Favo game</a>
+          </li>
+          
+        </ul>
+      </div>
+    <div id="gameContainer">
+        <canvas id="gameBoard" width="500" height="500"></canvas>
+        <div id="scoreText">0:0</div>
+        <button id="resetBtn">Reset</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
