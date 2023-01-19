@@ -1,641 +1,563 @@
-window.onload = function() {
-  var node = document.getElementById("canvasTetris");
-  canvasTetris(node);
+let canvas;
+let ctx;
+let gBArrayHeight = 20; // Aantal cellen in de hoogte
+let gBArrayWidth = 12; // Aantal cellen inde breedtje
+let startX = 4; // Start X positie voor Tetromino
+let startY = 0; // Start Y positie voor Tetromino
+let score = 0; // Houd score bij
+let level = 1; // Houd de huidige level bij
+let winOrLose = "Playing";
+// Used as a look up table where each value in the array
+// bevat de x & y positie 
+// doos op de canvas
+let coordinateArray = [...Array(gBArrayHeight)].map(e => Array(gBArrayWidth).fill(0));
+ 
+let curTetromino = [[1,0], [0,1], [1,1], [2,1]];
+ 
+// 3. Bevat alle tetrominos 
+let tetrominos = [];
+// 3. =De tetromino array met de kleuren afgestemd op de tetrominos array
+let tetrominoColors = ['purple','cyan','blue','yellow','orange','green','red'];
+// 3. Bevat de huidige tetrominos kleur
+let curTetrominoColor;
+ 
+// 4. Maak een gameboardarray zodat we weten waar andere vierkanten zijn
+let gameBoardArray = [...Array(20)].map(e => Array(12).fill(0));
+ 
+// 6. Array voor het opslaan van gestopte vormen
+// Het houdt kleuren vast wanneer een vorm stopt en wordt toegevoegd
+let stoppedShapeArray = [...Array(20)].map(e => Array(12).fill(0));
+ 
+// 4. Gemaakt om de richting te volgen waarin ik de Tetromino beweeg
+// zodat ik kan stoppen met proberen door muren te bewegen
+let DIRECTION = {
+    IDLE: 0,
+    DOWN: 1,
+    LEFT: 2,
+    RIGHT: 3
 };
-
-var canvasTetris = function(parentNode) {
-  var canvas = {
-    node: null,
-    context: null,
-    width: 0,
-    height: 0,
-    blockSide: 0
-  };
-
-  canvas.drawBackground = function() {
-    this.context.fillStyle = "#f8f8ff";
-    this.context.strokeStyle = "#696969";
-    this.context.fillRect(0, 0, this.width, this.height);
-    this.context.lineWidth = 8;
-    this.context.strokeRect(0, 0, this.width, this.height);
-    this.context.lineWidth = 4;
-    this.context.beginPath();
-    this.context.moveTo(256, 0);
-    this.context.lineTo(256, this.height);
-    this.context.stroke();
-    this.context.closePath();
-    this.context.fillStyle = "#696969";
-    this.context.fillText("SCORE:", 298, 75);
-    this.context.fillText(game.score.amount, 330 - game.score.halfWidth, 125);
-    this.context.fillText("NEXT:", 308, 220);
-    this.context.lineWidth = 2;
-    this.context.strokeRect(283, 255, 102, 102);
-    this.context.strokeStyle = "#f8f8ff";
-  };
-
-  canvas.drawBlock = function(yNum, xNum) {
-    var xCord = xNum * (this.blockSide + 2) + 5;
-    var yCord = yNum * (this.blockSide + 2) + 5;
-    this.context.strokeRect(xCord, yCord, this.blockSide, this.blockSide);
-    this.context.fillRect(xCord, yCord, this.blockSide, this.blockSide);
-  };
-
-  canvas.drawBlocks = function() {
-    for (var i = 0; i < game.rows; i++) {
-      for (var j = 0; j < game.cols; j++) {
-        if (game.blocks[i][j]) {
-          this.drawBlock(i, j);
-        }
-      }
+let direction;
+ 
+class Coordinates{
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
     }
-  };
-
-  canvas.drawNextBlock = function(yNum, xNum) {
-    var xCord = xNum * (this.blockSide + 2) + 285;
-    var yCord = yNum * (this.blockSide + 2) + 257;
-    this.context.strokeRect(xCord, yCord, this.blockSide, this.blockSide);
-    this.context.fillRect(xCord, yCord, this.blockSide, this.blockSide);
-  };
-
-  canvas.drawNextBlocks = function() {
-    for (var i = 0; i < game.nextSide; i++) {
-      for (var j = 0; j < game.nextSide; j++) {
-        if (tetromino.next.tetromino[i][j]) {
-          this.drawNextBlock(i, j);
+}
+ 
+// SetupCanvas uitvoeren wanneer pagina's worden geladen
+document.addEventListener('DOMContentLoaded', SetupCanvas); 
+ 
+// Hiermee maakt u de array met vierkante coördinaten [Tabel opzoeken]
+// [0,0] Pixels x: 11 y: 9, [1,0] pixels x: 34 Y: 9, ...
+function CreateCoordArray(){
+    let xR = 0, yR = 19;
+    let i = 0, j = 0;
+    for(let y = 9; y <= 446; y += 23){
+        // 12 * 23 = 276 - 12 = 264 Max X waarde
+        for(let x = 11; x <= 264; x += 23){
+            coordinateArray[i][j] = new Coordinates(x,y);
+            // console.log(i + ":" + j + " = " + coordinateArray[i][j].x + ":" + coordinateArray[i][j].y);
+            i++;
         }
-      }
+        j++;
+        i = 0;
     }
-  };
-
-  canvas.drawPause = function(gameTextNum) {
-    this.context.fillStyle = "#f8f8ff";
-    this.context.strokeStyle = "#696969";
-
-    this.context.fillRect(50, 110, 158, 80);
-    this.context.strokeRect(50, 110, 158, 80);
-    this.context.strokeRect(53, 113, 152, 74);
-
-    this.context.fillStyle = "#696969";
-    this.context.fillText(game.pauseText[gameTextNum].text, 130 - game.pauseText[gameTextNum].halfWidth, 155);
-
-    this.context.strokeStyle = "#f8f8ff";
-  };
-
-  canvas.draw = function() {
-    this.drawBackground();
-    this.drawBlocks();
-    this.drawNextBlocks();
-  };
-
-  var tetromino = {};
-
-  tetromino.current = {
-    tetromino: null,
-    number: 0,
-    direction: 0,
-    x: 0,
-    y: 0
-  };
-
-  tetromino.next = {
-    tetromino: [
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1],
-      [1, 1, 1, 1]
-    ],
-    number: 0,
-    direction: 0
-  };
-
-  tetromino.collection = [
-    [ // I
-      [
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [1, 1, 1, 1],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [1, 1, 1, 1],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-      ]
-    ],
-    [ // J
-      [
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 1, 1],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 1, 1, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 1],
-        [0, 0, 0, 1],
-        [0, 0, 0, 0]
-      ]
-    ],
-    [ // L
-      [
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 0, 1, 0],
-        [1, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 1, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [1, 1, 1, 0],
-        [1, 0, 0, 0],
-        [0, 0, 0, 0]
-      ]
-    ],
-    [ // O
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ]
-    ],
-    [ // S
-      [
-        [0, 1, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 0, 1, 1],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 1, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 0, 1, 1],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
-      ]
-    ],
-    [ // T
-      [
-        [0, 0, 0, 0],
-        [0, 1, 0, 0],
-        [1, 1, 1, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 1, 0],
-        [0, 1, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [1, 1, 1, 0],
-        [0, 1, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 0, 0],
-        [1, 1, 0, 0],
-        [0, 1, 0, 0]
-      ]
-    ],
-    [ // Z
-      [
-        [0, 0, 1, 0],
-        [0, 1, 1, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 1, 1],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 1, 0],
-        [0, 1, 1, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 0]
-      ],
-      [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 1, 1],
-        [0, 0, 0, 0]
-      ]
-    ]
-  ];
-
-  tetromino.chooseNext = function() {
-    var tetLen = this.collection.length;
-    var tetNum = Math.floor(Math.random() * tetLen);
-    tetNum = (tetNum === tetLen) ? (tetLen - 1) : tetNum;
-    var tetDir = Math.floor(Math.random() * 4);
-    tetDir = (tetDir === 4) ? 3 : tetDir;
-
-    this.current.tetromino = this.next.tetromino;
-    this.current.number = this.next.number;
-    this.current.direction = this.next.direction;
-    this.current.x = game.xStart;
-    this.current.y = game.yStart;
-
-    this.next.tetromino = this.collection[tetNum][tetDir];
-    this.next.number = tetNum;
-    this.next.direction = tetDir;
-
-    canvas.draw();
-  };
-
-  tetromino.move = function(xChanging, yChanging) {
-    if (this.checkPaste(xChanging, yChanging)) {
-      this.cutTetronimo();
-      this.current.x += xChanging;
-      this.current.y += yChanging;
-      this.pasteTetronimo();
-      canvas.draw();
-      return true;
+}
+ 
+function SetupCanvas(){
+    canvas = document.getElementById('my-canvas');
+    ctx = canvas.getContext('2d');
+    canvas.width = 936;
+    canvas.height = 956;
+ 
+    // Double the size of elements to fit the screen
+    ctx.scale(2, 2);
+ 
+    // Draw Canvas background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw gameboard rectangle
+    ctx.strokeStyle = 'black';
+    ctx.strokeRect(8, 8, 280, 462);
+ 
+    tetrisLogo = new Image(161, 54);
+    tetrisLogo.onload = DrawTetrisLogo;
+    tetrisLogo.src = "tetrislogo.png";
+ 
+    // Set font for score label text and draw
+    ctx.fillStyle = 'black';
+    ctx.font = '21px Arial';
+    ctx.fillText("SCORE", 300, 98);
+ 
+    // Draw score rectangle
+    ctx.strokeRect(300, 107, 161, 24);
+ 
+    // Draw score
+    ctx.fillText(score.toString(), 310, 127);
+    
+    // Draw level label text
+    ctx.fillText("LEVEL", 300, 157);
+ 
+    // Draw level rectangle
+    ctx.strokeRect(300, 171, 161, 24);
+ 
+    // Draw level
+    ctx.fillText(level.toString(), 310, 190);
+ 
+    // Draw next label text
+    ctx.fillText("WIN / LOSE", 300, 221);
+ 
+    // Draw playing condition
+    ctx.fillText(winOrLose, 310, 261);
+ 
+    // Draw playing condition rectangle
+    ctx.strokeRect(300, 232, 161, 95);
+    
+    // Draw controls label text
+    ctx.fillText("CONTROLS", 300, 354);
+ 
+    // Draw controls rectangle
+    ctx.strokeRect(300, 366, 161, 104);
+ 
+    // Draw controls text
+    ctx.font = '19px Arial';
+    ctx.fillText("A : Move Left", 310, 388);
+    ctx.fillText("D : Move Right", 310, 413);
+    ctx.fillText("S : Move Down", 310, 438);
+    ctx.fillText("E : Rotate Right", 310, 463);
+ 
+    // 2. Handle keyboard presses
+    document.addEventListener('keydown', HandleKeyPress);
+ 
+    // 3. Create the array of Tetromino arrays
+    CreateTetrominos();
+    // 3. Generate random Tetromino
+    CreateTetromino();
+ 
+    // Create the rectangle lookup table
+    CreateCoordArray();
+ 
+    DrawTetromino();
+}
+ 
+function DrawTetrisLogo(){
+    ctx.drawImage(tetrisLogo, 300, 8, 161, 54);
+}
+ 
+function DrawTetromino(){
+    // Cycle through the x & y array for the tetromino looking
+    // for all the places a square would be drawn
+    for(let i = 0; i < curTetromino.length; i++){
+ 
+        // Move the Tetromino x & y values to the tetromino
+        // shows in the middle of the gameboard
+        let x = curTetromino[i][0] + startX;
+        let y = curTetromino[i][1] + startY;
+ 
+        // 4. Put Tetromino shape in the gameboard array
+        gameBoardArray[x][y] = 1;
+        // console.log("Put 1 at [" + x + "," + y + "]");
+ 
+        // Look for the x & y values in the lookup table
+        let coorX = coordinateArray[x][y].x;
+        let coorY = coordinateArray[x][y].y;
+ 
+        // console.log("X : " + x + " Y : " + y);
+        // console.log("Rect X : " + coordinateArray[x][y].x + " Rect Y : " + coordinateArray[x][y].y);
+ 
+        // 1. Draw a square at the x & y coordinates that the lookup
+        // table provides
+        ctx.fillStyle = curTetrominoColor;
+        ctx.fillRect(coorX, coorY, 21, 21);
+    }
+}
+ 
+// ----- 2. Move & Delete Old Tetrimino -----
+// Each time a key is pressed we change the either the starting
+// x or y value for where we want to draw the new Tetromino
+// We also delete the previously drawn shape and draw the new one
+function HandleKeyPress(key){
+    if(winOrLose != "Game Over"){
+    // a keycode (LEFT)
+    if(key.keyCode === 65){
+        // 4. Check if I'll hit the wall
+        direction = DIRECTION.LEFT;
+        if(!HittingTheWall() && !CheckForHorizontalCollision()){
+            DeleteTetromino();
+            startX--;
+            DrawTetromino();
+        } 
+ 
+    // d keycode (RIGHT)
+    } else if(key.keyCode === 68){
+        
+        // 4. Check if I'll hit the wall
+        direction = DIRECTION.RIGHT;
+        if(!HittingTheWall() && !CheckForHorizontalCollision()){
+            DeleteTetromino();
+            startX++;
+            DrawTetromino();
+        }
+ 
+    // s keycode (DOWN)
+    } else if(key.keyCode === 83){
+        MoveTetrominoDown();
+        // 9. e keycode calls for rotation of Tetromino
+    } else if(key.keyCode === 69){
+        RotateTetromino();
+    }
+    } 
+}
+ 
+function MoveTetrominoDown(){
+    // 4. Track that I want to move down
+    direction = DIRECTION.DOWN;
+ 
+    // 5. Check for a vertical collision
+    if(!CheckForVerticalCollison()){
+        DeleteTetromino();
+        startY++;
+        DrawTetromino();
+    }
+}
+ 
+// 10. Automatically calls for a Tetromino to fall every second
+ 
+window.setInterval(function(){
+    if(winOrLose != "Game Over"){
+        MoveTetrominoDown();
+    }
+  }, 1000);
+ 
+ 
+// Clears the previously drawn Tetromino
+// Do the same stuff when we drew originally
+// but make the square white this time
+function DeleteTetromino(){
+    for(let i = 0; i < curTetromino.length; i++){
+        let x = curTetromino[i][0] + startX;
+        let y = curTetromino[i][1] + startY;
+ 
+        // 4. Delete Tetromino square from the gameboard array
+        gameBoardArray[x][y] = 0;
+ 
+        // Draw white where colored squares used to be
+        let coorX = coordinateArray[x][y].x;
+        let coorY = coordinateArray[x][y].y;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(coorX, coorY, 21, 21);
+    }
+}
+ 
+// 3. Generate random Tetrominos with color
+// We'll define every index where there is a colored block
+function CreateTetrominos(){
+    // Push T 
+    tetrominos.push([[1,0], [0,1], [1,1], [2,1]]);
+    // Push I
+    tetrominos.push([[0,0], [1,0], [2,0], [3,0]]);
+    // Push J
+    tetrominos.push([[0,0], [0,1], [1,1], [2,1]]);
+    // Push Square
+    tetrominos.push([[0,0], [1,0], [0,1], [1,1]]);
+    // Push L
+    tetrominos.push([[2,0], [0,1], [1,1], [2,1]]);
+    // Push S
+    tetrominos.push([[1,0], [2,0], [0,1], [1,1]]);
+    // Push Z
+    tetrominos.push([[0,0], [1,0], [1,1], [2,1]]);
+}
+ 
+function CreateTetromino(){
+    // Get a random tetromino index
+    let randomTetromino = Math.floor(Math.random() * tetrominos.length);
+    // Set the one to draw
+    curTetromino = tetrominos[randomTetromino];
+    // Get the color for it
+    curTetrominoColor = tetrominoColors[randomTetromino];
+}
+ 
+// 4. Check if the Tetromino hits the wall
+// Cycle through the squares adding the upper left hand corner
+// position to see if the value is <= to 0 or >= 11
+// If they are also moving in a direction that would be off
+// the board stop movement
+function HittingTheWall(){
+    for(let i = 0; i < curTetromino.length; i++){
+        let newX = curTetromino[i][0] + startX;
+        if(newX <= 0 && direction === DIRECTION.LEFT){
+            return true;
+        } else if(newX >= 11 && direction === DIRECTION.RIGHT){
+            return true;
+        }  
     }
     return false;
-  };
-
-  tetromino.rotate = function() {
-    this.cutTetronimo();
-    var oldDirection = this.current.direction;
-    this.current.direction = (this.current.direction + 1) % 4;
-    this.current.tetromino = this.collection[this.current.number][this.current.direction];
-    if (!this.checkPaste(0, 0)) {
-      this.current.direction = oldDirection;
-      this.current.tetromino = this.collection[this.current.number][this.current.direction];
-    }
-    this.pasteTetronimo(false);
-    canvas.draw();
-  };
-
-  tetromino.cutTetronimo = function() {
-    for (var i = 0; i < game.nextSide; i++) {
-      var yBlock = this.current.y + i;
-      if (yBlock >= 0) {
-        for (var j = 0; j < game.nextSide; j++) {
-          if (this.current.tetromino[i][j] !== 0) {
-            game.blocks[yBlock][this.current.x + j] = 0;
-          }
+}
+ 
+// 5. Check for vertical collison
+function CheckForVerticalCollison(){
+    // Make a copy of the tetromino so that I can move a fake
+    // Tetromino and check for collisions before I move the real
+    // Tetromino
+    let tetrominoCopy = curTetromino;
+    // Will change values based on collisions
+    let collision = false;
+ 
+    // Cycle through all Tetromino squares
+    for(let i = 0; i < tetrominoCopy.length; i++){
+        // Get each square of the Tetromino and adjust the square
+        // position so I can check for collisions
+        let square = tetrominoCopy[i];
+        // Move into position based on the changing upper left
+        // hand corner of the entire Tetromino shape
+        let x = square[0] + startX;
+        let y = square[1] + startY;
+ 
+        // If I'm moving down increment y to check for a collison
+        if(direction === DIRECTION.DOWN){
+            y++;
         }
-      }
-    }
-  };
-
-  tetromino.checkPaste = function(xChanging, yChanging) {
-    for (var i = 0; i < game.nextSide; i++) {
-      var yBlock = this.current.y + yChanging + i;
-      var yTetBlock = yChanging + i;
-      for (var j = 0; j < game.nextSide; j++) {
-        if (this.current.tetromino[i][j] !== 0) {
-          var xBlock = this.current.x + xChanging + j;
-          var xTetBlock = xChanging + j;
-          if (xBlock < 0 || xBlock >= game.cols) {
-            return false;
-          }
-          if (yBlock >= game.rows) {
-            return false;
-          }
-          if (yBlock >= 0) {
-            if (game.blocks[yBlock][xBlock]) {
-              if ((xTetBlock >= 0) && (xTetBlock < game.nextSide) && (yTetBlock < game.nextSide)) {
-                if (this.current.tetromino[yTetBlock][xTetBlock] === 0) {
-                  return false;
-                } else {
-                  if (xChanging === 0 && yChanging === 0) {
-                    return false;
-                  }
-                }
-              } else {
-                return false;
-              }
-            }
-          }
+ 
+        // Check if I'm going to hit a previously set piece
+        // if(gameBoardArray[x][y+1] === 1){
+        if(typeof stoppedShapeArray[x][y+1] === 'string'){
+            // console.log("COLLISON x : " + x + " y : " + y);
+            // If so delete Tetromino
+            DeleteTetromino();
+            // Increment to put into place and draw
+            startY++;
+            DrawTetromino();
+            collision = true;
+            break;
         }
-      }
-    }
-    return true;
-  };
-
-  tetromino.pasteTetronimo = function() {
-    for (var i = 0; i < game.nextSide; i++) {
-      var yBlock = this.current.y + i;
-      if (yBlock >= 0) {
-        for (var j = 0; j < game.nextSide; j++) {
-          if (this.current.tetromino[i][j] !== 0) {
-            game.blocks[yBlock][this.current.x + j] = this.current.tetromino[i][j];
-          }
+        if(y >= 20){
+            collision = true;
+            break;
         }
-      }
     }
-  };
-
-  var game = {
-    score: {
-      amount: 0,
-      halfWidth: 0
-    },
-    speed: 0,
-    timer: null,
-    paused: false,
-    pauseText: [{
-      text: "Start!",
-      halfWidth: 0
-    }, {
-      text: "Paused",
-      halfWidth: 0
-    }, {
-      text: "Game over!",
-      halfWidth: 0
-    }],
-    blocks: [],
-    rows: 16,
-    cols: 10,
-    nextSide: 4
-  };
-
-  game.xStart = Math.floor((game.cols - game.nextSide) / 2);
-  game.yStart = -game.nextSide;
-
-  game.setGame = function() {
-    parentNode.className += " tetris";
-
-    canvas.node = document.createElement("canvas");
-    canvas.node.className = "tetrisCanvas";
-    canvas.node.setAttribute("tabindex", "0");
-    canvas.node.innerHTML = "Your browser does not support the HTML5 canvas tag";
-    parentNode.appendChild(canvas.node);
-    canvas.width = 412;
-    canvas.height = 408;
-    canvas.node.setAttribute("width", canvas.width + "px");
-    canvas.node.setAttribute("height", canvas.height + "px");
-    canvas.blockSide = 23;
-    canvas.context = canvas.node.getContext("2d");
-    canvas.context.font = "bold 18px Arial";
-
-    for (var i = 0; i < this.pauseText.length; i++) {
-      this.pauseText[i].halfWidth = Math.round(canvas.context.measureText(this.pauseText[i].text).width / 2);
-    }
-    this.score.halfWidth = Math.round(canvas.context.measureText(0).width / 2);
-
-    for (i = 0; i < this.rows; i++) {
-      this.blocks[i] = [];
-      for (var j = 0; j < this.cols; j++) {
-        this.blocks[i][j] = 1;
-      }
-    }
-
-    canvas.drawBackground();
-    canvas.drawBlocks();
-    canvas.drawNextBlocks();
-    canvas.drawPause(0);
-
-    canvas.node.focus();
-
-    canvas.node.addEventListener("click", game.resetGame, false);
-  };
-
-  game.resetGame = function() {
-    canvas.node.removeEventListener("click", game.resetGame, false);
-    canvas.node.addEventListener("keydown", game.keyPress, false);
-    canvas.node.addEventListener("focus", game.focus, false);
-    canvas.node.addEventListener("blur", game.blur, false);
-    game.setScore(0);
-
-    for (var i = 0; i < game.rows; i++) {
-      for (var j = 0; j < game.cols; j++) {
-        game.blocks[i][j] = 0;
-      }
-    }
-
-    tetromino.chooseNext();
-    tetromino.chooseNext();
-
-    game.speed = 1000;
-    game.timer = setInterval(game.move, game.speed);
-  };
-
-  game.move = function() {
-    if (!tetromino.move(0, 1)) {
-      game.checkScore();
-      game.checkGameOver();
-    }
-  };
-
-  game.checkScore = function() {
-    var lines = 0;
-    var curLine = tetromino.current.y + game.nextSide - 1;
-    if (curLine >= game.rows) curLine = game.rows - 1;
-
-    for (var i = 0; i <= game.nextSide; i++) {
-      var filled = true;
-      for (var j = 0; j < game.cols; j++) {
-        if (!game.blocks[curLine][j]) {
-          filled = false;
-          break;
-        }
-      }
-      if (filled) {
-        lines++;
-        this.scoreLine(curLine);
-      } else {
-        curLine--;
-        if (curLine < 0) {
-          break;
-        }
-      }
-    }
-
-    if (lines > 1) {
-      this.addScore(100 * lines);
-    }
-  };
-
-  game.scoreLine = function(line) {
-    for (var i = line; i > 0; i--) {
-      for (var j = 0; j < game.cols; j++) {
-        game.blocks[i][j] = game.blocks[i - 1][j];
-      }
-    }
-    this.addScore(100);
-  };
-
-  game.setScore = function(newScore) {
-    this.score.amount = newScore;
-    this.score.halfWidth = Math.round(canvas.context.measureText(newScore).width / 2);
-    canvas.draw();
-  };
-
-  game.addScore = function(scoreToAdd) {
-    var oldScore = this.score.amount;
-    var newScore = oldScore + scoreToAdd;
-    this.setScore(newScore);
-    if (game.speed > 100 && (Math.floor(newScore / 1000) > Math.floor(oldScore / 1000))) {
-      game.speed -= 10;
-      clearInterval(this.timer);
-      game.timer = setInterval(game.move, game.speed);
-    }
-  };
-
-  game.checkGameOver = function() {
-    for (var j = 0; j < game.cols; j++) {
-      if (game.blocks[0][j]) {
-        this.gameOver();
-        return;
-      }
-    }
-    tetromino.chooseNext();
-  };
-
-  game.gameOver = function() {
-    clearInterval(this.timer);
-    canvas.node.removeEventListener("keydown", game.keyPress, false);
-    canvas.node.removeEventListener("focus", game.focus, false);
-    canvas.node.removeEventListener("blur", game.blur, false);
-    game.animateGameOver();
-  };
-
-  game.animateGameOver = function() {
-    var i = game.rows - 1;
-    var j = 0;
-    (function() {
-      if (i >= 0) {
-        game.blocks[i][j] = 1;
-        canvas.draw();
-        canvas.drawPause(2);
-        if ((j + 1) < game.cols) {
-          j++;
+    if(collision){
+        // Check for game over and if so set game over text
+        if(startY <= 2){
+            winOrLose = "Game Over";
+            ctx.fillStyle = 'white';
+            ctx.fillRect(310, 242, 140, 30);
+            ctx.fillStyle = 'black';
+            ctx.fillText(winOrLose, 310, 261);
         } else {
-          j = 0;
-          i--;
+ 
+            // 6. Add stopped Tetromino to stopped shape array
+            // so I can check for future collisions
+            for(let i = 0; i < tetrominoCopy.length; i++){
+                let square = tetrominoCopy[i];
+                let x = square[0] + startX;
+                let y = square[1] + startY;
+                // Add the current Tetromino color
+                stoppedShapeArray[x][y] = curTetrominoColor;
+            }
+ 
+            // 7. Check for completed rows
+            CheckForCompletedRows();
+ 
+            CreateTetromino();
+ 
+            // Create the next Tetromino and draw it and reset direction
+            direction = DIRECTION.IDLE;
+            startX = 4;
+            startY = 0;
+            DrawTetromino();
         }
-        setTimeout(arguments.callee, 20);
-      } else {
-        canvas.node.addEventListener("click", game.resetGame, false);
-      }
-    })();
-  };
-
-  game.pause = function() {
-    if (game.paused) {
-      canvas.draw();
-      game.timer = setInterval(game.move, game.speed);
-    } else {
-      canvas.drawPause(1);
-      clearInterval(this.timer);
+ 
     }
-    game.paused = !game.paused;
-  };
-
-  game.focus = function() {
-    if (game.paused) {
-      canvas.node.focus();
-      game.pause();
+}
+ 
+// 6. Check for horizontal shape collision
+function CheckForHorizontalCollision(){
+    // Copy the Teromino so I can manipulate its x value
+    // and check if its new value would collide with
+    // a stopped Tetromino
+    var tetrominoCopy = curTetromino;
+    var collision = false;
+ 
+    // Cycle through all Tetromino squares
+    for(var i = 0; i < tetrominoCopy.length; i++)
+    {
+        // Get the square and move it into position using
+        // the upper left hand coordinates
+        var square = tetrominoCopy[i];
+        var x = square[0] + startX;
+        var y = square[1] + startY;
+ 
+        // Move Tetromino clone square into position based
+        // on direction moving
+        if (direction == DIRECTION.LEFT){
+            x--;
+        }else if (direction == DIRECTION.RIGHT){
+            x++;
+        }
+ 
+        // Get the potential stopped square that may exist
+        var stoppedShapeVal = stoppedShapeArray[x][y];
+ 
+        // If it is a string we know a stopped square is there
+        if (typeof stoppedShapeVal === 'string')
+        {
+            collision=true;
+            break;
+        }
     }
-  };
-
-  game.blur = function() {
-    if (!game.paused) {
-      game.pause();
+ 
+    return collision;
+}
+ 
+// 7. Check for completed rows
+// ***** SLIDE *****
+function CheckForCompletedRows(){
+ 
+    // 8. Track how many rows to delete and where to start deleting
+    let rowsToDelete = 0;
+    let startOfDeletion = 0;
+ 
+    // Check every row to see if it has been completed
+    for (let y = 0; y < gBArrayHeight; y++)
+    {
+        let completed = true;
+        // Cycle through x values
+        for(let x = 0; x < gBArrayWidth; x++)
+        {
+            // Get values stored in the stopped block array
+            let square = stoppedShapeArray[x][y];
+ 
+            // Check if nothing is there
+            if (square === 0 || (typeof square === 'undefined'))
+            {
+                // If there is nothing there once then jump out
+                // because the row isn't completed
+                completed=false;
+                break;
+            }
+        }
+ 
+        // If a row has been completed
+        if (completed)
+        {
+            // 8. Used to shift down the rows
+            if(startOfDeletion === 0) startOfDeletion = y;
+            rowsToDelete++;
+ 
+            // Delete the line everywhere
+            for(let i = 0; i < gBArrayWidth; i++)
+            {
+                // Update the arrays by deleting previous squares
+                stoppedShapeArray[i][y] = 0;
+                gameBoardArray[i][y] = 0;
+                // Look for the x & y values in the lookup table
+                let coorX = coordinateArray[i][y].x;
+                let coorY = coordinateArray[i][y].y;
+                // Draw the square as white
+                ctx.fillStyle = 'white';
+                ctx.fillRect(coorX, coorY, 21, 21);
+            }
+        }
     }
-  };
-
-  game.keyPress = function(e) {
-    e.preventDefault();
-
-    if (!game.paused) {
-      switch (e.keyCode) {
-        case 37: // links
-          tetromino.move(-1, 0);
-          break;
-        case 38: // boven
-          tetromino.rotate();
-          break;
-        case 39: // Rechts
-          tetromino.move(1, 0);
-          break;
-        case 40: // beneden
-          tetromino.move(0, 1);
-          break;
-        case 80: // P
-          game.pause();
-          break;
-      }
-    } else {
-      if (e.keyCode === 80) {
-        game.pause();
-      }
+    if(rowsToDelete > 0){
+        score += 10;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(310, 109, 140, 19);
+        ctx.fillStyle = 'black';
+        ctx.fillText(score.toString(), 310, 127);
+        MoveAllRowsDown(rowsToDelete, startOfDeletion);
     }
-  };
-
-  game.setGame();
-};
+}
+ 
+// 8. Move rows down after a row has been deleted
+function MoveAllRowsDown(rowsToDelete, startOfDeletion){
+    for (var i = startOfDeletion-1; i >= 0; i--)
+    {
+        for(var x = 0; x < gBArrayWidth; x++)
+        {
+            var y2 = i + rowsToDelete;
+            var square = stoppedShapeArray[x][i];
+            var nextSquare = stoppedShapeArray[x][y2];
+ 
+            if (typeof square === 'string')
+            {
+                nextSquare = square;
+                gameBoardArray[x][y2] = 1; // Put block into GBA
+                stoppedShapeArray[x][y2] = square; // Draw color into stopped
+ 
+                // Look for the x & y values in the lookup table
+                let coorX = coordinateArray[x][y2].x;
+                let coorY = coordinateArray[x][y2].y;
+                ctx.fillStyle = nextSquare;
+                ctx.fillRect(coorX, coorY, 21, 21);
+ 
+                square = 0;
+                gameBoardArray[x][i] = 0; // Clear the spot in GBA
+                stoppedShapeArray[x][i] = 0; // Clear the spot in SSA
+                coorX = coordinateArray[x][i].x;
+                coorY = coordinateArray[x][i].y;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(coorX, coorY, 21, 21);
+            }
+        }
+    }
+}
+ 
+// 9. Rotate the Tetromino
+// ***** SLIDE *****
+function RotateTetromino()
+{
+    let newRotation = new Array();
+    let tetrominoCopy = curTetromino;
+    let curTetrominoBU;
+ 
+    for(let i = 0; i < tetrominoCopy.length; i++)
+    {
+        // Here to handle a error with a backup Tetromino
+        // We are cloning the array otherwise it would 
+        // create a reference to the array that caused the error
+        curTetrominoBU = [...curTetromino];
+ 
+        // Find the new rotation by getting the x value of the
+        // last square of the Tetromino and then we orientate
+        // the others squares based on it [SLIDE]
+        let x = tetrominoCopy[i][0];
+        let y = tetrominoCopy[i][1];
+        let newX = (GetLastSquareX() - y);
+        let newY = x;
+        newRotation.push([newX, newY]);
+    }
+    DeleteTetromino();
+ 
+    // Try to draw the new Tetromino rotation
+    try{
+        curTetromino = newRotation;
+        DrawTetromino();
+    }  
+    // If there is an error get the backup Tetromino and
+    // draw it instead
+    catch (e){ 
+        if(e instanceof TypeError) {
+            curTetromino = curTetrominoBU;
+            DeleteTetromino();
+            DrawTetromino();
+        }
+    }
+}
+ 
+// Gets the x value for the last square in the Tetromino
+// so we can orientate all other squares using that as
+// a boundary. This simulates rotating the Tetromino
+function GetLastSquareX()
+{
+    let lastX = 0;
+     for(let i = 0; i < curTetromino.length; i++)
+    {
+        let square = curTetromino[i];
+        if (square[0] > lastX)
+            lastX = square[0];
+    }
+    return lastX;
+}
