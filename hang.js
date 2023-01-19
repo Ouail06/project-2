@@ -71,14 +71,14 @@ function SetupCanvas(){
     canvas.width = 936;
     canvas.height = 956;
  
-    // Double the size of elements to fit the screen
+    // Verdubbel de grootte van elementen om op het scherm te passen
     ctx.scale(2, 2);
  
-    // Draw Canvas background
+    // Kleur Canvas achtergrond
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw gameboard rectangle
+    // kleur gameboard rechthoek
     ctx.strokeStyle = 'black';
     ctx.strokeRect(8, 8, 280, 462);
  
@@ -86,57 +86,57 @@ function SetupCanvas(){
     tetrisLogo.onload = DrawTetrisLogo;
     tetrisLogo.src = "tetrislogo.png";
  
-    // Set font for score label text and draw
+    // Lettertype instellen voor tekst en teken op scorelabel
     ctx.fillStyle = 'black';
     ctx.font = '21px Arial';
     ctx.fillText("SCORE", 300, 98);
  
-    // Draw score rectangle
+    //  score rechthoek
     ctx.strokeRect(300, 107, 161, 24);
  
-    // Draw score
+    // score
     ctx.fillText(score.toString(), 310, 127);
     
-    // Draw level label text
+    // Tekst van het niveaulabel
     ctx.fillText("LEVEL", 300, 157);
  
-    // Draw level rectangle
+    // level rechthoek
     ctx.strokeRect(300, 171, 161, 24);
  
-    // Draw level
+    // level
     ctx.fillText(level.toString(), 310, 190);
  
-    // Draw next label text
+    // label tekst
     ctx.fillText("WIN / LOSE", 300, 221);
  
-    // Draw playing condition
+    // Win pf verlies
     ctx.fillText(winOrLose, 310, 261);
  
-    // Draw playing condition rectangle
+    // Speel rechthoek
     ctx.strokeRect(300, 232, 161, 95);
     
-    // Draw controls label text
+    // besturingselementen labeltekst
     ctx.fillText("CONTROLS", 300, 354);
  
-    // Draw controls rectangle
+    // controleert rechthoek
     ctx.strokeRect(300, 366, 161, 104);
  
-    // Draw controls text
+    // controleert tekst
     ctx.font = '19px Arial';
-    ctx.fillText("A : Move Left", 310, 388);
-    ctx.fillText("D : Move Right", 310, 413);
-    ctx.fillText("S : Move Down", 310, 438);
-    ctx.fillText("E : Rotate Right", 310, 463);
+    ctx.fillText("A : beweeg links", 310, 388);
+    ctx.fillText("D : beweeg rechts", 310, 413);
+    ctx.fillText("S : beweeg naar beneden", 310, 438);
+    ctx.fillText("E : Roteer naar rechts", 310, 463);
  
-    // 2. Handle keyboard presses
+    // 2. Toetsenbord
     document.addEventListener('keydown', HandleKeyPress);
  
-    // 3. Create the array of Tetromino arrays
+    // 3. De array van Tetromino-arrays maken
     CreateTetrominos();
-    // 3. Generate random Tetromino
+    // 3. Genereer random tetromino
     CreateTetromino();
  
-    // Create the rectangle lookup table
+    // De opzoektabel voor rechthoek maken
     CreateCoordArray();
  
     DrawTetromino();
@@ -147,42 +147,41 @@ function DrawTetrisLogo(){
 }
  
 function DrawTetromino(){
-    // Cycle through the x & y array for the tetromino looking
-    // for all the places a square would be drawn
+    // Blader door de x &y array voor de tetromino 
+    // voor alle plaatsen zou een vierkant worden getekend
     for(let i = 0; i < curTetromino.length; i++){
  
-        // Move the Tetromino x & y values to the tetromino
-        // shows in the middle of the gameboard
+        // Verplaats de Tetromino x &y waarden naar de tetromino
+        // toont in het midden van het speelbord
         let x = curTetromino[i][0] + startX;
         let y = curTetromino[i][1] + startY;
  
-        // 4. Put Tetromino shape in the gameboard array
+        // 4. Zet Tetromino-vorm in de gameboard-array
         gameBoardArray[x][y] = 1;
-        // console.log("Put 1 at [" + x + "," + y + "]");
+        // console.log("stop 1 in [" + x + "," + y + "]");
  
-        // Look for the x & y values in the lookup table
+        // Zoek naar de x &y-waarden in de opzoektabel
         let coorX = coordinateArray[x][y].x;
         let coorY = coordinateArray[x][y].y;
  
         // console.log("X : " + x + " Y : " + y);
         // console.log("Rect X : " + coordinateArray[x][y].x + " Rect Y : " + coordinateArray[x][y].y);
  
-        // 1. Draw a square at the x & y coordinates that the lookup
-        // table provides
+        // 1. Teken een vierkant op de x &y coördinaten die de zoekopdracht
         ctx.fillStyle = curTetrominoColor;
         ctx.fillRect(coorX, coorY, 21, 21);
     }
 }
  
-// ----- 2. Move & Delete Old Tetrimino -----
-// Each time a key is pressed we change the either the starting
-// x or y value for where we want to draw the new Tetromino
-// We also delete the previously drawn shape and draw the new one
+// ----- 2. Verplaatsen & Verwijder Oude Tetrimino -----
+// Telkens wanneer een toets wordt ingedrukt, veranderen we het begin
+// x- of y-waarde voor waar ik de nieuwe Tetromino wil tekenen
+// ik verwijder ook de eerder getekende vorm en tekenen de nieuwe
 function HandleKeyPress(key){
     if(winOrLose != "Game Over"){
-    // a keycode (LEFT)
+    // a teken (LEFT)
     if(key.keyCode === 65){
-        // 4. Check if I'll hit the wall
+        // 4. Controleer of ik de muur zal raken
         direction = DIRECTION.LEFT;
         if(!HittingTheWall() && !CheckForHorizontalCollision()){
             DeleteTetromino();
@@ -190,10 +189,10 @@ function HandleKeyPress(key){
             DrawTetromino();
         } 
  
-    // d keycode (RIGHT)
+    // d teken (RIGHT)
     } else if(key.keyCode === 68){
         
-        // 4. Check if I'll hit the wall
+        // 4.  Controleer of ik de muur zal raken
         direction = DIRECTION.RIGHT;
         if(!HittingTheWall() && !CheckForHorizontalCollision()){
             DeleteTetromino();
@@ -201,10 +200,10 @@ function HandleKeyPress(key){
             DrawTetromino();
         }
  
-    // s keycode (DOWN)
+    // s teken (DOWN)
     } else if(key.keyCode === 83){
         MoveTetrominoDown();
-        // 9. e keycode calls for rotation of Tetromino
+        // 9. e teken roept rotatie van Tetromino op
     } else if(key.keyCode === 69){
         RotateTetromino();
     }
@@ -212,10 +211,10 @@ function HandleKeyPress(key){
 }
  
 function MoveTetrominoDown(){
-    // 4. Track that I want to move down
+    // 4.meet dat ik naar beneden wil gaan
     direction = DIRECTION.DOWN;
  
-    // 5. Check for a vertical collision
+    // 5. Controleren op een verticale botsing
     if(!CheckForVerticalCollison()){
         DeleteTetromino();
         startY++;
@@ -223,7 +222,7 @@ function MoveTetrominoDown(){
     }
 }
  
-// 10. Automatically calls for a Tetromino to fall every second
+// 10. Roept automatisch op dat een Tetromino elke seconde valt
  
 window.setInterval(function(){
     if(winOrLose != "Game Over"){
@@ -232,9 +231,9 @@ window.setInterval(function(){
   }, 1000);
  
  
-// Clears the previously drawn Tetromino
-// Do the same stuff when we drew originally
-// but make the square white this time
+// Wist de eerder getekende Tetromino
+// Doe dezelfde dingen toen we oorspronkelijk tekenden
+// maar maak het vierkant deze keer wit
 function DeleteTetromino(){
     for(let i = 0; i < curTetromino.length; i++){
         let x = curTetromino[i][0] + startX;
