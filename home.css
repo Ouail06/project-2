@@ -7,7 +7,7 @@ body{
 #welkom{
   display: flex;
   justify-content: center;
-  
+  padding-top: 200px;
 }
   h3{
     display: flex;

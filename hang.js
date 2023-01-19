@@ -7,7 +7,6 @@ let startY = 0; // Start Y positie voor Tetromino
 let score = 0; // Houd score bij
 let level = 1; // Houd de huidige level bij
 let winOrLose = "Playing";
-// Used as a look up table where each value in the array
 // bevat de x & y positie 
 // doos op de canvas
 let coordinateArray = [...Array(gBArrayHeight)].map(e => Array(gBArrayWidth).fill(0));
