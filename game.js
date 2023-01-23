@@ -1,6 +1,6 @@
 function startGame() {
-    // laat een bericht zien dat het spel begonnen is
-    document.getElementById("gameStatus").innerHTML = "Het spel van Abdel is begonnen! Abdel wenst je succes!";
+    // laat een bericht zien voor een bedank van het spelen van de game
+    document.getElementById("gameStatus").innerHTML = "Dankuwel voor het spelen van mijn prachtige game! Abdel wenst je verder veel plezier op de website!";
     
     // Hussel een random nummer tussen de 1 en de 100
     var randomNumber = Math.floor(Math.random() * 100) + 1;
